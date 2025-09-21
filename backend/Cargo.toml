@@ -1,0 +1,18 @@
+[package]
+name = "oj-backend"
+version = "0.1.0"
+
+[dependencies]
+axum = { features = ["full"] }
+tokio = {  features = ["full"] }
+serde = { features = ["derive"] }
+serde_json
+sqlx = { features = ["postgres", "runtime-tokio-native-tls", "macros"] }
+tracing
+tracing-subscriber = { features = ["env-filter"] }
+anyhow = "1.0"
+thiserror = "1.0"
+
+[dev-dependencies]
+
+[build-dependencies]
