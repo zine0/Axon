@@ -7,7 +7,7 @@ pub struct ContainerSandbox {
 }
 
 impl ContainerSandbox {
-    pub fn new(container_id: &str, rootfs: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new(container_id: &str, rootfs: &str) -> anyhow::Result<Self> {
         // Create minimal rootfs directory structure
         fs::create_dir_all(rootfs)?;
 
@@ -30,11 +30,17 @@ impl ContainerSandbox {
         })
     }
 
-    pub fn run_command(
-        &self,
-        command: &str,
-        args: &[&str],
-    ) -> Result<String, Box<dyn std::error::Error>> {
+    pub fn copy_file_in(&self, src: &str, dest: &str) -> anyhow::Result<()> {
+        fs::copy(src, format!("{}/{}", self.rootfs, dest))?;
+        Ok(())
+    }
+
+    pub fn copy_file_out(&self, src: &str, dest: &str) -> anyhow::Result<()> {
+        fs::copy(format!("{}/{}", self.rootfs, src), dest)?;
+        Ok(())
+    }
+
+    pub fn run_command(&self, command: &str, args: &[&str]) -> anyhow::Result<String> {
         // Create container configuration with host mounts
         self.create_container_config(command, args)?;
 
@@ -48,15 +54,14 @@ impl ContainerSandbox {
         if output.status.success() {
             Ok(String::from_utf8(output.stdout)?)
         } else {
-            Err(format!("Command failed: {}", String::from_utf8(output.stderr)?).into())
+            Err(anyhow::anyhow!(
+                "Command failed: {}",
+                String::from_utf8(output.stderr)?
+            ))
         }
     }
 
-    fn create_container_config(
-        &self,
-        command: &str,
-        args: &[&str],
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    fn create_container_config(&self, command: &str, args: &[&str]) -> anyhow::Result<()> {
         let mut full_args = vec![command];
         full_args.extend_from_slice(args);
 
@@ -162,7 +167,7 @@ impl ContainerSandbox {
         Ok(())
     }
 
-    pub fn cleanup(&self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn cleanup(&self) -> anyhow::Result<()> {
         // Delete the container
         let _output = Command::new("runc")
             .args(&["delete", &self.container_id])
@@ -172,7 +177,7 @@ impl ContainerSandbox {
     }
 
     /// Clean up rootfs directory
-    pub fn cleanup_rootfs(&self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn cleanup_rootfs(&self) -> anyhow::Result<()> {
         if std::path::Path::new(&self.rootfs).exists() {
             fs::remove_dir_all(&self.rootfs)?;
         }

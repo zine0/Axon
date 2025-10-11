@@ -20,12 +20,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => println!("Error running command: {}", e),
     }
 
-    // 测试 uname
-    match sandbox.run_command("/bin/uname", &["-a"]) {
-        Ok(output) => println!("System info:\n{}", output),
-        Err(e) => println!("Error running uname: {}", e),
-    }
-
     sandbox.cleanup()?;
     sandbox.cleanup_rootfs()?;
 
