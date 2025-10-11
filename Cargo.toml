@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "backend",
-    "judger",
+    "judger", "sandbox",
     "shared",
 ]
 

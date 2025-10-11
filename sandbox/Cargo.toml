@@ -1,0 +1,14 @@
+[package]
+name = "axon-sandbox"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "sandbox"
+path = "src/lib.rs"
+
+[dependencies]
+nix = "0.30.1"
+serde = "1.0.228"
+serde_json = "1.0.145"
+walkdir = "2.5.0"
